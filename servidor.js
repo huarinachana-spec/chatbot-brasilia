@@ -108,13 +108,13 @@ app.post('/webhook', async (req, res) => {
     // =========================
     if (texto === 'hola' || texto === 'menu' || texto === 'menú' || texto === 'inicio') {
       estadosUsuario[from] = { paso: 'menu' };
-      await enviarMenuPrincipal(from);
+      enviarMenuPrincipal(from);
       return res.sendStatus(200);
     }
 
     if (texto === 'asesor' || texto === 'hablar con asesor' || texto === '5') {
       estadosUsuario[from] = { paso: 'asesor' };
-      await enviarMensajeWhatsApp(
+      enviarMensajeWhatsApp(
         from,
         'Claro 🙂 Un asesor puede ayudarte con información más detallada. En breve nos pondremos en contacto contigo.'
       );
@@ -123,7 +123,7 @@ app.post('/webhook', async (req, res) => {
     
     if (texto === "menu") {
   estadosUsuario[from] = { paso: 'menu' };
-  await enviarMenuPrincipal(from);
+  enviarMenuPrincipal(from);
   return res.sendStatus(200);
 }
     // =========================
@@ -132,7 +132,7 @@ app.post('/webhook', async (req, res) => {
     if (estadosUsuario[from].paso === 'menu') {
       if (texto === '1') {
         estadosUsuario[from] = { paso: 'esperando_toner' };
-        await enviarMensajeWhatsApp(
+        enviarMensajeWhatsApp(
           from,
           'Has elegido TONERS 🖨️\n\nEscríbeme el modelo o código del toner.\nEjemplos:\n• 85A\n• 83A\n• HP 12A'
         );
@@ -141,7 +141,7 @@ app.post('/webhook', async (req, res) => {
 
       if (texto === '2') {
         estadosUsuario[from] = { paso: 'esperando_camara' };
-        await enviarMensajeWhatsApp(
+        enviarMensajeWhatsApp(
           from,
           'Has elegido CÁMARAS 📷\n\nEscríbeme la marca o modelo de la cámara que buscas.\nEjemplos:\n• Hikvision\n• Dahua\n• DS-2CE56D0T-IR'
         );
@@ -150,7 +150,7 @@ app.post('/webhook', async (req, res) => {
 
       if (texto === '3') {
         estadosUsuario[from] = { paso: 'esperando_biometrico' };
-        await enviarMensajeWhatsApp(
+        enviarMensajeWhatsApp(
           from,
           'Has elegido BIOMÉTRICOS 👆\n\nEscríbeme la marca o modelo del biométrico.\nEjemplos:\n• ZKTeco\n• K40\n• LX50'
         );
@@ -159,11 +159,11 @@ app.post('/webhook', async (req, res) => {
 
       if (texto === '4') {
         estadosUsuario[from] = { paso: 'viendo_servicios' };
-        await consultarServicios(from);
+        consultarServicios(from);
         return res.sendStatus(200);
       }
 
-      await enviarMensajeWhatsApp(
+      enviarMensajeWhatsApp(
         from,
         'No entendí tu opción.\n\nEscribe:\n1 para Toners\n2 para Cámaras\n3 para Biométricos\n4 para Servicios\n5 para Hablar con asesor'
       );
@@ -174,7 +174,7 @@ app.post('/webhook', async (req, res) => {
     // TONERS
     // =========================
     if (estadosUsuario[from].paso === 'esperando_toner') {
-      await consultarCategoria(from, textoOriginal, 'Toner');
+      consultarCategoria(from, textoOriginal, 'Toner');
       return res.sendStatus(200);
     }
 
@@ -182,7 +182,7 @@ app.post('/webhook', async (req, res) => {
     // CÁMARAS
     // =========================
     if (estadosUsuario[from].paso === 'esperando_camara') {
-      await consultarCategoria(from, textoOriginal, 'Camara');
+      consultarCategoria(from, textoOriginal, 'Camara');
       return res.sendStatus(200);
     }
 
@@ -190,7 +190,7 @@ app.post('/webhook', async (req, res) => {
     // BIOMÉTRICOS
     // =========================
     if (estadosUsuario[from].paso === 'esperando_biometrico') {
-      await consultarCategoria(from, textoOriginal, 'Biometrico');
+      consultarCategoria(from, textoOriginal, 'Biometrico');
       return res.sendStatus(200);
     }
 
@@ -239,12 +239,12 @@ async function consultarCategoria(numero, textoUsuario, categoria) {
     conexion.query(query, [categoria, valor, valor, valor, valor], async (err, resultados) => {
       if (err) {
         console.error('Error en consulta:', err);
-        await enviarMensajeWhatsApp(numero, 'Ocurrió un error al consultar la base de datos.');
+        enviarMensajeWhatsApp(numero, 'Ocurrió un error al consultar la base de datos.');
         return resolve();
       }
 
       if (resultados.length === 0) {
-        await enviarMensajeWhatsApp(
+        enviarMensajeWhatsApp(
           numero,
           'No encontré un producto con esa referencia.\n\nEscribe "menu" para ver las opciones disponibles.'
         );
@@ -270,7 +270,7 @@ resultados.forEach((p, i) => {
 respuesta += '👉 Escribe *menu* para volver al inicio';
 
 
-      await enviarMensajeWhatsApp(numero, respuesta);
+      enviarMensajeWhatsApp(numero, respuesta);
       return resolve();
     });
   });
@@ -291,12 +291,12 @@ async function consultarServicios(numero) {
     conexion.query(query, async (err, resultados) => {
       if (err) {
         console.error('Error al consultar servicios:', err);
-        await enviarMensajeWhatsApp(numero, 'Ocurrió un error al consultar los servicios.');
+        enviarMensajeWhatsApp(numero, 'Ocurrió un error al consultar los servicios.');
         return resolve();
       }
 
       if (resultados.length === 0) {
-        await enviarMensajeWhatsApp(numero, 'No hay servicios registrados actualmente.');
+        enviarMensajeWhatsApp(numero, 'No hay servicios registrados actualmente.');
         return resolve();
       }
 
@@ -313,7 +313,7 @@ async function consultarServicios(numero) {
 
       respuesta += 'Escribe "menu" para volver al menú principal.';
 
-      await enviarMensajeWhatsApp(numero, respuesta);
+      enviarMensajeWhatsApp(numero, respuesta);
       return resolve();
     });
   });
@@ -322,7 +322,7 @@ async function consultarServicios(numero) {
 // detectar intención directa (sin menú)
 if (texto.includes("toner") || texto.match(/\d{2,3}[a-zA-Z]?/)) {
   estadosUsuario[from] = { paso: 'esperando_toner' };
-  await consultarCategoria(from, textoOriginal, 'Toner');
+  consultarCategoria(from, textoOriginal, 'Toner');
   return res.sendStatus(200);
 }
 // =========================
@@ -340,7 +340,7 @@ async function enviarMenuPrincipal(numero) {
     '5️⃣ Hablar con asesor\n\n' +
     '✍️ Escribe el número de la opción que deseas consultar';
 
-  await enviarMensajeWhatsApp(numero, mensaje);
+  enviarMensajeWhatsApp(numero, mensaje);
 }
 
 // =========================
@@ -348,7 +348,7 @@ async function enviarMenuPrincipal(numero) {
 // =========================
 async function enviarMensajeWhatsApp(numero, mensaje) {
   try {
-    await axios.post(
+    axios.post(
       `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
       {
         messaging_product: 'whatsapp',
